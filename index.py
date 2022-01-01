@@ -1,7 +1,9 @@
+import enum
+
 class State:
   def __init__(self) -> None:
-    self.left_side = ["P", "T", "F", "M", "B", "B", "G", "G"],
-    self.boat = [],
+    self.left_side = ["P", "T", "F", "M", "B", "B", "G", "G"]
+    self.boat = []
     self.right_side = []
   
   def copy(self):
@@ -10,6 +12,52 @@ class State:
     copiedState.right_side = self.right_side.copy()
     copiedState.boat = self.boat.copy()
     return copiedState
+
+class Directions(enum.Enum):
+  LeftToRight = 1
+  RightToLeft = 2
+
+class Move:
+  moveDirection = None
+  passengers = []
+
+  def __init__():
+    pass
+
+  def setPassengers(self, passengers):
+    self.passengers = passengers
+  
+  def setDirection(self, direction):
+    self.direction = direction
+
+class Node:
+  parentNode = None
+  children = []
+  state = None
+  move = None
+
+  def __init__(self):
+    self.state = State()
+    pass
+
+  def childOf(self, node):
+    self.parentNode = node
+  
+  def createChild(self):
+    newNode = Node()
+    newNode.childOf(self)
+    return newNode
+
+  def setMove(self, move):
+    self.move = move
+
+  def setState(self, state):
+    self.state = state
+
+  def getParentNode(self):
+    return self.parentNode
+  
+
 
 
 state_names = ["left_side", "boat", "right_side"]
@@ -43,7 +91,9 @@ def isValid(state):
     if "G" in state[name] and "F" in state[name] and "M" not in state[name]: return False
 
 
-  
-def __main__():
-  pass
+if __name__ == "__main__":
+  node1 = Node()
+  node2 = Node()
+
+  print(node1.state.left_side)
   
