@@ -1,4 +1,5 @@
 import enum
+import time
 
 state_names = ["left_side", "boat", "right_side"]
 
@@ -300,8 +301,64 @@ def findTheSequence(node):
     
   return result
 
+def show(node):
+  nodes_array_sorted = []
+  while node.getParentNode() != None:
+    nodes_array_sorted.insert(0, node)
+    node = node.getParentNode()
+  
+  for (index, item) in enumerate(nodes_array_sorted):
+    print("Move number #", index, ": ")
+    print("In this move ",item.move.passengers, " went from ", end='')
+    if item.move.moveDirection == Directions.RightToLeft:
+      print("Right to Left")
+    else:
+      print("Left to Right")
+    
+    print()
+    print("Left side of River")
+    print("-----------------------")
+    print(item.state.left_side)
+    print("-----------------------")
+    print("right side of River")
+    print("-----------------------")
+    print(item.state.right_side)
+    print("-----------------------")
+    print()
+    print()
+    print("-------------------------------------------------------------------")
+
+def pathShow(node, waiting_time):
+  nodes_array_sorted = []
+  while node.getParentNode() != None:
+    nodes_array_sorted.insert(0, node)
+    node = node.getParentNode()
+  
+  for (index, item) in enumerate(nodes_array_sorted):
+    print("Move number #", index, ": ")
+    print("In this move ",item.move.passengers, " went from ", end='')
+    if item.move.moveDirection == Directions.RightToLeft:
+      print("Right to Left")
+    else:
+      print("Left to Right")
+    
+    print()
+    print("Left side of River")
+    print("-----------------------")
+    print(item.state.left_side)
+    print("-----------------------")
+    print("right side of River")
+    print("-----------------------")
+    print(item.state.right_side)
+    print("-----------------------")
+    print()
+    print()
+    print("-------------------------------------------------------------------")
+    time.sleep(waiting_time)
+
 if __name__ == "__main__":
   firstNode = Node()
   firstNode.generateChildren()
   sequence = findTheSequence(firstNode)
+  pathShow(sequence, 1)
   
