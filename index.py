@@ -1,4 +1,5 @@
 import enum
+from typing import Sequence
 
 state_names = ["left_side", "boat", "right_side"]
 
@@ -102,19 +103,32 @@ class Move:
     self.passengers = passengers
   
   def setDirection(self, direction):
-    self.direction = direction
+    self.moveDirection = direction
+
+class StateId:
+  stateId = None
+  move = None
+
+  def __init__(self, stateId, move):
+    self.stateId = stateId
+    self.move = move.moveDirection
 
 class Node:
   parentNode = None
-  children = []
-  previousStateIds = []
+  children = None
+  previousStateIds = None
   stateId = None
   state = None
   move = None
+  isProcessed = None
+
   
   def __init__(self):
+    self.isProcessed = False
+    self.children = []
+    self.previousStateIds = []
     self.state = State()
-    self.stateId = calculateStateId(self.state)
+    self.stateId = StateId(111122, Move())
 
   def childOf(self, node):
     self.parentNode = node
@@ -122,8 +136,8 @@ class Node:
   def createChild(self, state, move):
     newNode = Node()
     newNode.childOf(self)
-    newNode.setState(state)
     newNode.setMove(move)
+    newNode.setState(state)
     self.children.append(newNode)
     newPreviousStateIds = self.previousStateIds.copy()
     newPreviousStateIds.append(self.stateId)
@@ -138,7 +152,8 @@ class Node:
 
   def setState(self, state):
     self.state = state
-    self.stateId = calculateStateId(self.state)
+    stateId = calculateStateId(self.state)
+    self.stateId = StateId(stateId, self.move)
 
   def getParentNode(self):
     return self.parentNode
@@ -161,12 +176,18 @@ class Node:
 
           if membersMovedToOtherSideValidityCheck :
             copiedStateId = calculateStateId(copiedState)
-            if copiedStateId not in self.previousStateIds:
-              newMove = Move()
-              newMove.setDirection(Directions.LeftToRight)
-              newMove.setPassengers([member])
-              
-              newNode = self.createChild(copiedState, newMove)
+            newMove = Move()
+            newMove.setDirection(Directions.LeftToRight)
+            newMove.setPassengers([member])
+            isLoop = False
+            for id in self.previousStateIds:
+              if id.stateId == copiedStateId and id.move == newMove.moveDirection:
+                isLoop = True
+                break
+            
+            if not isLoop:
+              self.createChild(copiedState, newMove)
+            
 
       # possible moves with two person on the boat
       for i in range(len(self.state.left_side)):
@@ -189,12 +210,17 @@ class Node:
 
             if membersMovedToOtherSideValidityCheck :
               copiedStateId = calculateStateId(copiedState)
-              if copiedStateId not in self.previousStateIds:
-                newMove = Move()
-                newMove.setDirection(Directions.LeftToRight)
-                newMove.setPassengers([self.state.left_side[j], self.state.left_side[i]])
-
-                newNode = self.createChild(copiedState, newMove)       
+              newMove = Move()
+              newMove.setDirection(Directions.LeftToRight)
+              newMove.setPassengers([self.state.left_side[j], self.state.left_side[i]])
+              isLoop = False
+              for id in self.previousStateIds:
+                if id.stateId == copiedStateId and id.move == newMove.moveDirection:
+                  isLoop = True
+                  break
+              
+              if not isLoop:
+                self.createChild(copiedState, newMove)      
               
     # for Right to left move
     else:
@@ -213,12 +239,17 @@ class Node:
 
           if membersMovedToOtherSideValidityCheck :
             copiedStateId = calculateStateId(copiedState)
-            if copiedStateId not in self.previousStateIds:
-              newMove = Move()
-              newMove.setDirection(Directions.RightToLeft)
-              newMove.setPassengers([member])
-              
-              newNode = self.createChild(copiedState, newMove)
+            newMove = Move()
+            newMove.setDirection(Directions.RightToLeft)
+            newMove.setPassengers([member])
+            isLoop = False
+            for id in self.previousStateIds:
+              if id.stateId == copiedStateId and id.move == newMove.moveDirection:
+                isLoop = True
+                break
+            
+            if not isLoop:
+              self.createChild(copiedState, newMove)
 
       # possible moves with two person on the boat
       for i in range(len(self.state.right_side)):
@@ -241,14 +272,37 @@ class Node:
 
             if membersMovedToOtherSideValidityCheck :
               copiedStateId = calculateStateId(copiedState)
-              if copiedStateId not in self.previousStateIds:
-                newMove = Move()
-                newMove.setDirection(Directions.RightToLeft)
-                newMove.setPassengers([self.state.right_side[j], self.state.right_side[i]])
+              newMove = Move()
+              newMove.setDirection(Directions.RightToLeft)
+              newMove.setPassengers([self.state.right_side[j], self.state.right_side[i]])
+              isLoop = False
+              for id in self.previousStateIds:
+                if id.stateId == copiedStateId and id.move == newMove.moveDirection:
+                  isLoop = True
+                  break
+              
+              if not isLoop:
+                self.createChild(copiedState, newMove)
 
-                newNode = self.createChild(copiedState, newMove)
+# finding the right sequence
+def findTheSequence(node):
+  
+  if isGoal(node.state):
+    return node
 
+  if not node.isProcessed:
+    node.generateChildren()
+    node.isProcessed = True
+  
+  result = None
+  for child in node.children:
+    result = findTheSequence(child)
+    if isinstance(result, Node): break
+    
+  return result
 
 if __name__ == "__main__":
-  pass
-    
+  firstNode = Node()
+  firstNode.generateChildren()
+  sequence = findTheSequence(firstNode)
+  
